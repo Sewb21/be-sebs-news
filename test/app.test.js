@@ -86,6 +86,44 @@ describe("/api", () => {
       //     });
       // });
     });
-    describe("PATCH", () => {});
+    describe("PATCH", () => {
+      test("returns a status: 200 and an updated article by 1", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ inc_votes: 1 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body[0]).toEqual({
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              topic: "mitch",
+              author: "butter_bridge",
+              body: "I find this existence challenging",
+              created_at: "2018-11-15T12:21:54.171Z",
+              votes: "101",
+            });
+          });
+      });
+      test("returns a status: 200 and an updated article by 25 votes", () => {
+        return request(app)
+          .patch("/api/articles/1")
+          .send({ inc_votes: 25 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body[0]).toEqual({
+              article_id: 1,
+              title: "Living in the shadow of a great man",
+              topic: "mitch",
+              author: "butter_bridge",
+              body: "I find this existence challenging",
+              created_at: "2018-11-15T12:21:54.171Z",
+              votes: "125",
+            });
+          });
+      });
+    });
+    // describe("POST", () => {
+    //   test("Returns a status: 200 ");
+    // });
   });
 });

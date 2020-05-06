@@ -18,3 +18,10 @@ exports.updateArticleByID = (article_id, inc_votes) => {
     .increment("votes", inc_votes)
     .returning("*");
 };
+
+exports.addCommentsByArticleID = (article_id, username, body) => {
+  return knex("comments")
+    .insert({ author: username, article_id: article_id, body: body })
+    .returning(["comment_id", "body"])
+    .where({ "comments.body": body });
+};

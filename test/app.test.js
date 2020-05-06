@@ -68,7 +68,7 @@ describe("/api", () => {
           });
       });
     });
-    describe("ERRORS", () => {
+    xdescribe("ERRORS", () => {
       test("responds with a status: 400 for a bad request", () => {
         return request(app)
           .get("/api/articles/not-an-id")
@@ -77,14 +77,14 @@ describe("/api", () => {
             expect(msg).toBe("bad request");
           });
       });
-      // test("responds with a status: 405 for a method not allowed", () => {
-      //   return request(app)
-      //     .post("/api/articles/1")
-      //     .expect(405)
-      //     .then(({ body: { msg } }) => {
-      //       expect(msg).toBe("method not allowed");
-      //     });
-      // });
+      test("responds with a status: 405 for a method not allowed", () => {
+        return request(app)
+          .post("/api/articles/1")
+          .expect(405)
+          .then(({ body: { msg } }) => {
+            expect(msg).toBe("method not allowed");
+          });
+      });
     });
     describe("PATCH", () => {
       test("returns a status: 200 and an updated article by 1", () => {
@@ -122,8 +122,20 @@ describe("/api", () => {
           });
       });
     });
-    // describe("POST", () => {
-    //   test("Returns a status: 200 ");
-    // });
+    describe("POST", () => {
+      test("Returns a status: 200 and the posted comment", () => {
+        return request(app)
+          .post("/api/articles/1/comments")
+          .send({ username: "butter_bridge", body: "What a great article" })
+          .expect(200)
+          .then(({ body }) => {
+            console.log(body[0]);
+            expect(body[0]).toEqual({
+              comment_id: 19,
+              body: "What a great article",
+            });
+          });
+      });
+    });
   });
 });

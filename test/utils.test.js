@@ -81,11 +81,11 @@ describe("formatDates", () => {
 });
 
 describe("makeRefObj", () => {
-  test("returns an empty array if passed nothing or an empty array", () => {
-    const list = [];
+  test("returns an empty object if passed nothing or an empty array", () => {
+    const list = {};
     const list2 = undefined;
-    expect(makeRefObj(list)).toEqual([]);
-    expect(makeRefObj(list2)).toEqual([]);
+    expect(makeRefObj(list)).toEqual({});
+    expect(makeRefObj(list2)).toEqual({});
   });
   test("returns a succesful refObj when passed an array of one person", () => {
     const list = [

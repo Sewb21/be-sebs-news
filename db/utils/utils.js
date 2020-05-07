@@ -1,13 +1,12 @@
 exports.formatDates = (list) => {
   if (list && list.length > 0) {
-    // const copiedList = [...list];
-    const arrCopy = list.map((obj) => ({ ...obj }));
+    const copiedList = [...list];
 
-    arrCopy.forEach((obj) => {
+    copiedList.forEach((obj) => {
       const date = new Date(obj.created_at);
       obj.created_at = date;
     });
-    return arrCopy;
+    return copiedList;
   }
   return [];
 };
@@ -21,7 +20,7 @@ exports.makeRefObj = (list) => {
     });
     return lookup;
   }
-  return [];
+  return {};
 };
 
 exports.formatComments = (comments, articleRef) => {

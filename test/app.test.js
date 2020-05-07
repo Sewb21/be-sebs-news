@@ -86,7 +86,7 @@ describe("/api", () => {
           .send({ inc_votes: 1 })
           .expect(200)
           .then(({ body }) => {
-            expect(body.updatedArticle[0]).toEqual({
+            expect(body.article[0]).toEqual({
               article_id: 1,
               title: "Living in the shadow of a great man",
               topic: "mitch",
@@ -103,7 +103,7 @@ describe("/api", () => {
           .send({ inc_votes: 25 })
           .expect(200)
           .then(({ body }) => {
-            expect(body.updatedArticle[0]).toEqual({
+            expect(body.article[0]).toEqual({
               article_id: 1,
               title: "Living in the shadow of a great man",
               topic: "mitch",
@@ -264,7 +264,7 @@ describe("/api", () => {
       });
       test("returns a status: and sorted by votes and ordered ascending", () => {
         return request(app)
-          .get("/api/articles?order=asc&&sort_by=votes")
+          .get("/api/articles?order=asc&sort_by=votes")
           .expect(200)
           .then(({ body }) => {
             expect(body.articles).toBeSortedBy("votes", {
@@ -278,6 +278,37 @@ describe("/api", () => {
           .expect(200)
           .then(({ body }) => {
             expect(body.articles.length).toBe(3);
+          });
+      });
+      test.only("returns a status 200 and the return of multiple queries", () => {
+        return request(app)
+          .get("/api/articles?topic=mitch?author=butter_bridge")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toEqual([
+              {
+                title: "Living in the shadow of a great man",
+                topic: "mitch",
+                author: "butter_bridge",
+                body: "I find this existence challenging",
+                created_at: 1542284514171,
+                votes: 100,
+              },
+              {
+                title: "They're not exactly dogs, are they?",
+                topic: "mitch",
+                author: "butter_bridge",
+                body: "Well? Think about it.",
+                created_at: 533132514171,
+              },
+              {
+                title: "Moustache",
+                topic: "mitch",
+                author: "butter_bridge",
+                body: "Have you seen the size of that thing?",
+                created_at: 154700514171,
+              },
+            ]);
           });
       });
     });
@@ -310,7 +341,7 @@ describe("/api", () => {
             expect(body.comment[0].votes).toBe("15");
           });
       });
-      xtest("returns a 404 when passed a invalid comment id", () => {
+      test("returns a 404 when passed a invalid comment id", () => {
         return request(app)
           .patch("/api/commetnts/1000")
           .send({ inc_vote: 1 })
@@ -320,19 +351,19 @@ describe("/api", () => {
           });
       });
     });
-    describe.only("DELETE", () => {
+    describe("DELETE", () => {
       test("returns a status: 204 and no content", () => {
         return request(app).del("/api/comments/1").expect(204);
       });
-      // test("returns a 404 when trying to delete a non existant house", () => {
-      //   return request(app)
-      //     .del("/api/comments/1000")
-      //     .expect(404)
-      //     .then(({ body }) => {
-      //       console.log(body);
-      //       expect(body.msg).toBe("comment not found");
-      //     });
-      // });
+      test("returns a 404 when trying to delete a non existant house", () => {
+        return request(app)
+          .del("/api/comments/1000")
+          .expect(404)
+          .then(({ body }) => {
+            console.log(body);
+            expect(body.msg).toBe("comment not found");
+          });
+      });
     });
   });
 });

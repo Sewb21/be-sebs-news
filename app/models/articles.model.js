@@ -28,7 +28,6 @@ exports.selectAllArticles = ({ sort_by, order, author, topic }) => {
     .groupBy("articles.article_id")
     .modify((query) => {
       if (author) query.where({ "articles.author": author });
-      else if (topic) query.where({ "articles.topic": topic });
-    })
-    .returning("*");
+      if (topic) query.where({ "articles.topic": topic });
+    });
 };

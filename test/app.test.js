@@ -214,7 +214,7 @@ describe("/api", () => {
         });
     });
   });
-  describe.only("/articles", () => {
+  describe("/articles", () => {
     describe("GET", () => {
       test("returns a status: 200 and an array of article objects", () => {
         return request(app)
@@ -288,6 +288,51 @@ describe("/api", () => {
         .then(({ body }) => {
           expect(body.articles.length).toBe(11);
         });
+    });
+  });
+  describe("/comments/:comment_id", () => {
+    describe("PATCH", () => {
+      test("returns a status: 200 and a sucessfully patched updated comment", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_vote: 1 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comment[0].votes).toBe("17");
+          });
+      });
+      test("returns a status: 200 and a successfully patched comment when passed a negative number", () => {
+        return request(app)
+          .patch("/api/comments/1")
+          .send({ inc_vote: -1 })
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.comment[0].votes).toBe("15");
+          });
+      });
+      xtest("returns a 404 when passed a invalid comment id", () => {
+        return request(app)
+          .patch("/api/commetnts/1000")
+          .send({ inc_vote: 1 })
+          .expect(404)
+          .then(({ body }) => {
+            expect(body.msg).toBe("comment not found");
+          });
+      });
+    });
+    describe.only("DELETE", () => {
+      test("returns a status: 204 and no content", () => {
+        return request(app).del("/api/comments/1").expect(204);
+      });
+      // test("returns a 404 when trying to delete a non existant house", () => {
+      //   return request(app)
+      //     .del("/api/comments/1000")
+      //     .expect(404)
+      //     .then(({ body }) => {
+      //       console.log(body);
+      //       expect(body.msg).toBe("comment not found");
+      //     });
+      // });
     });
   });
 });

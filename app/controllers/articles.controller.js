@@ -34,7 +34,7 @@ exports.postCommentsByArticleID = (req, res, next) => {
 
   addCommentsByArticleID(article_id, username, body)
     .then((postedComment) => {
-      res.send({ postedComment });
+      res.status(200).send({ postedComment });
     })
     .catch(next);
 };

@@ -12,6 +12,11 @@
     "migrate-latest": "knex migrate:latest",
     "migrate-rollback": "knex migrate:rollback"
   },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "jest-sorted"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/northcoders/be-nc-news.git"
@@ -32,6 +37,8 @@
     "supertest": "^4.0.2"
   },
   "devDependencies": {
-    "jest": "^25.5.4"
+    "jest": "^25.5.4",
+    "setupFilesAfterEnv": "jest-sorted",
+    "jest-sorted": "^1.0.6"
   }
 }

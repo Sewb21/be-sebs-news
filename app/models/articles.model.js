@@ -22,6 +22,14 @@ exports.updateArticleByID = (article_id, inc_votes) => {
 exports.addCommentsByArticleID = (article_id, username, body) => {
   return knex("comments")
     .insert({ author: username, article_id: article_id, body: body })
-    .returning(["comment_id", "body"])
+    .returning(["article_id", "author", "body", "comment_id", "votes"])
     .where({ "comments.body": body });
+};
+
+exports.selectCommentsByArticleID = ({ article_id, sort_by, order }) => {
+  return knex
+    .select("comments.*")
+    .from("comments")
+    .orderBy(sort_by || "created_at", order || "desc")
+    .where("article_id", "=", article_id);
 };

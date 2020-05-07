@@ -3,6 +3,7 @@ const {
   updateArticleByID,
   addCommentsByArticleID,
   selectCommentsByArticleID,
+  selectAllArticles,
 } = require("../models/articles.model");
 
 exports.getArticleByID = (req, res, next) => {
@@ -45,6 +46,16 @@ exports.getCommentsByArticleID = (req, res, next) => {
   selectCommentsByArticleID({ article_id, sort_by, order })
     .then((comments) => {
       res.send({ comments });
+    })
+    .catch(next);
+};
+
+exports.getAllArticles = (req, res, next) => {
+  const { sort_by, order, author, topic } = req.query;
+
+  selectAllArticles({ sort_by, order, author, topic })
+    .then((articles) => {
+      res.send({ articles });
     })
     .catch(next);
 };

@@ -202,7 +202,7 @@ describe("/api", () => {
           });
         });
     });
-    test.only("returns a status: 200 and the order of the votes sorted_by order", () => {
+    test("returns a status: 200 and the order of the votes sorted_by order", () => {
       return request(app)
         .get("/api/articles/1/comments?sort_by=votes&&order=asc")
         .expect(200)
@@ -214,7 +214,80 @@ describe("/api", () => {
         });
     });
   });
-  describe("/articles", () => {
-    describe("GET", () => {});
+  describe.only("/articles", () => {
+    describe("GET", () => {
+      test("returns a status: 200 and an array of article objects", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            body.articles.forEach((article) => {
+              expect(article).toHaveProperty("author");
+              expect(article).toHaveProperty("title");
+              expect(article).toHaveProperty("article_id");
+              expect(article).toHaveProperty("topic");
+              expect(article).toHaveProperty("created_at");
+              expect(article).toHaveProperty("votes");
+              expect(article).toHaveProperty("comment_count");
+            });
+          });
+      });
+      test("returns a status: 200 and is sorted by date (created_at)", () => {
+        return request(app)
+          .get("/api/articles")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toBeSortedBy("created_at", {
+              descending: true,
+            });
+          });
+      });
+      test("returns a status: 200 and has a vaid sort_by query thats sorted by votes", () => {
+        return request(app)
+          .get("/api/articles?sort_by=votes")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toBeSortedBy("votes", {
+              descending: true,
+              coerce: true,
+            });
+          });
+      });
+      test("returns a status: 200 and has a valid order query thats defaults to descending", () => {
+        return request(app)
+          .get("/api/articles?order=asc")
+          .then(({ body }) => {
+            expect(body.articles).toBeSortedBy("created_at", {
+              ascending: true,
+            });
+          });
+      });
+      test("returns a status: and sorted by votes and ordered ascending", () => {
+        return request(app)
+          .get("/api/articles?order=asc&&sort_by=votes")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles).toBeSortedBy("votes", {
+              ascending: true,
+            });
+          });
+      });
+      test("returns a status: 200 and returns only the auther passed through the query", () => {
+        return request(app)
+          .get("/api/articles/?author=butter_bridge")
+          .expect(200)
+          .then(({ body }) => {
+            expect(body.articles.length).toBe(3);
+          });
+      });
+    });
+    test("returns status: 200 and returns only the topic passed in as a query", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles.length).toBe(11);
+        });
+    });
   });
 });

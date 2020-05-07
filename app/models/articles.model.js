@@ -33,3 +33,17 @@ exports.selectCommentsByArticleID = ({ article_id, sort_by, order }) => {
     .orderBy(sort_by || "created_at", order || "desc")
     .where("article_id", "=", article_id);
 };
+
+exports.selectAllArticles = ({ sort_by, order, author, topic }) => {
+  return knex
+    .select("articles.*")
+    .from("articles")
+    .count("comments.comment_id as comment_count")
+    .leftJoin("comments", "comments.article_id", "=", "articles.article_id")
+    .orderBy(sort_by || "created_at", order || "desc")
+    .groupBy("articles.article_id")
+    .modify((query) => {
+      if (author) query.where({ "articles.author": author });
+      else if (topic) query.where({ "articles.topic": topic });
+    });
+};

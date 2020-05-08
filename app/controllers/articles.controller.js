@@ -9,7 +9,7 @@ exports.getArticleByID = (req, res, next) => {
 
   selectArticleByID(article_id)
     .then((article) => {
-      res.send({ article });
+      res.status(200).send({ article });
     })
     .catch(next);
 };
@@ -20,7 +20,7 @@ exports.patchArticleByID = (req, res, next) => {
 
   updateArticleByID(article_id, inc_votes)
     .then((article) => {
-      res.send({ article });
+      res.status(200).send({ article });
     })
     .catch(next);
 };
@@ -30,7 +30,7 @@ exports.getAllArticles = (req, res, next) => {
 
   selectAllArticles({ sort_by, order, author, topic })
     .then((articles) => {
-      res.send({ articles });
+      res.status(200).send({ articles });
     })
     .catch(next);
 };

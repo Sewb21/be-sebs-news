@@ -11,6 +11,9 @@ articlesRouter.route("/").get(getAllArticles);
 articlesRouter
   .route("/:article_id")
   .get(getArticleByID)
-  .patch(patchArticleByID);
+  .patch(patchArticleByID)
+  .all((req, res) => {
+    res.status(405).send({ msg: "method not allowed" });
+  });
 
 module.exports = articlesRouter;

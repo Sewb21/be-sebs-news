@@ -18,7 +18,14 @@ exports.updateVotesByCommentID = (comment_id, inc_vote) => {
   return knex("comments")
     .where({ "comments.comment_id": comment_id })
     .increment("votes", inc_vote)
-    .returning("*");
+    .returning("*")
+    .then((comment) => {
+      if (comment.length === 0) {
+        return Promise.reject({ status: 404, msg: "comment not found" });
+      } else {
+        return comment;
+      }
+    });
 };
 
 exports.removeCommentbyID = (comment_id) => {
@@ -28,6 +35,8 @@ exports.removeCommentbyID = (comment_id) => {
     .then((delCount) => {
       if (delCount === 0) {
         return Promise.reject({ status: 404, msg: "comment not found" });
+      } else {
+        return { status: 204 };
       }
     });
 };

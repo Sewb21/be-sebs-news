@@ -7,13 +7,19 @@ exports.selectArticleByID = (article_id) => {
     .where({ "articles.article_id": article_id })
     .count("comments.comment_id as comment_count")
     .leftJoin("comments", "comments.article_id", "=", "articles.article_id")
-    .groupBy("articles.article_id");
+    .groupBy("articles.article_id")
+    .then((articles) => {
+      if (articles.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "article not found",
+        });
+      } else return articles;
+    });
 };
 
 exports.updateArticleByID = (article_id, inc_votes) => {
-  return knex
-    .select("articles.*")
-    .from("articles")
+  return knex("articles")
     .where({ "articles.article_id": article_id })
     .increment("votes", inc_votes)
     .returning("*");

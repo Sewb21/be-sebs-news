@@ -193,6 +193,15 @@ describe("/articles/:article_id", () => {
           });
         });
     });
+    test("returns a status: 400 for no votes on the request body", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({})
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad Request");
+        });
+    });
   });
 });
 describe("/articles/:article_id/comments", () => {

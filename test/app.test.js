@@ -94,19 +94,53 @@ describe("/users/:username", () => {
 });
 describe("/articles/:article_id", () => {
   describe("GET", () => {
-    test("responds with a status: 200 and a article object which should have certain properties", () => {
+    test("returns a status: 200 and body to be an object", () => {
       return request(app)
         .get("/api/articles/1")
         .expect(200)
         .then(({ body }) => {
-          expect(body.article[0]).toHaveProperty("author");
-          expect(body.article[0]).toHaveProperty("title");
-          expect(body.article[0]).toHaveProperty("article_id");
-          expect(body.article[0]).toHaveProperty("body");
-          expect(body.article[0]).toHaveProperty("topic");
-          expect(body.article[0]).toHaveProperty("created_at");
-          expect(body.article[0]).toHaveProperty("votes");
-          expect(body.article[0]).toHaveProperty("comment_count");
+          expect(typeof body).toBe("object");
+          expect(Array.isArray(body)).toBe(false);
+        });
+    });
+    test.only("responds with a status: 200 and a article object which should have certain properties", () => {
+      return request(app)
+        .get("/api/articles/1")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article).toHaveProperty("author");
+          expect(body.article).toHaveProperty("title");
+          expect(body.article).toHaveProperty("article_id");
+          expect(body.article).toHaveProperty("body");
+          expect(body.article).toHaveProperty("topic");
+          expect(body.article).toHaveProperty("created_at");
+          expect(body.article).toHaveProperty("votes");
+          expect(body.article).toHaveProperty("comment_count");
+          expect(body.article.count).toBe("13");
+        });
+    });
+    test.only("responds with a status: 200 and a article object which should have certain properties", () => {
+      return request(app)
+        .get("/api/articles/2")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article).toHaveProperty("author");
+          expect(body.article).toHaveProperty("title");
+          expect(body.article).toHaveProperty("article_id");
+          expect(body.article).toHaveProperty("body");
+          expect(body.article).toHaveProperty("topic");
+          expect(body.article).toHaveProperty("created_at");
+          expect(body.article).toHaveProperty("votes");
+          expect(body.article).toHaveProperty("comment_count");
+          expect(body.article.count).toBe("0");
+        });
+    });
+    test("returns a status: 404 for an ivalid path", () => {
+      return request(app)
+        .get("/api/articles/1000")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("article not found");
         });
     });
     test("returns a status: 404 for an ivalid path", () => {
@@ -122,7 +156,7 @@ describe("/articles/:article_id", () => {
         .get("/api/articles/doggie")
         .expect(400)
         .then(({ body }) => {
-          expect(body.msg).toBe("bad request");
+          expect(body.msg).toBe("Bad Request");
         });
     });
     test("returns a status: 404 for an ivalid path", () => {
@@ -130,7 +164,7 @@ describe("/articles/:article_id", () => {
         .get("/api/articles/superBigDoggie")
         .expect(400)
         .then(({ body }) => {
-          expect(body.msg).toBe("bad request");
+          expect(body.msg).toBe("Bad Request");
         });
     });
   });
@@ -191,15 +225,6 @@ describe("/articles/:article_id", () => {
             created_at: "2018-11-15T12:21:54.171Z",
             votes: "125",
           });
-        });
-    });
-    test("returns a status: 400 for no votes on the request body", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({})
-        .expect(400)
-        .then(({ body }) => {
-          expect(body.msg).toBe("Bad Request");
         });
     });
   });
@@ -374,6 +399,38 @@ describe("/articles", () => {
         .expect(200)
         .then(({ body }) => {
           expect(body.articles.length).toBe(3);
+        });
+    });
+    test("returns a status: 404 and a msg: topic not found", () => {
+      return request(app)
+        .get("/api/articles?topic=not-a-topic")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Query not found");
+        });
+    });
+    test("returns a status: 404 and a msg: topic not found", () => {
+      return request(app)
+        .get("/api/articles?author=not-an-author")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Query not found");
+        });
+    });
+    test("returns a status: 404 and a msg: topic not found", () => {
+      return request(app)
+        .get("/api/articles?author=not-an-author?topic=not-a-topic")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Query not found");
+        });
+    });
+    test("returns a status: 400 for a bad request when trying to sort by an non existent column", () => {
+      return request(app)
+        .get("/api/articles?sort_by=not-a-column")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad Request");
         });
     });
   });

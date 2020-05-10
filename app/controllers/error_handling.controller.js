@@ -7,7 +7,10 @@ exports.handleCustomErrors = (err, req, res, next) => {
 };
 
 exports.handlePSQLErrors = (err, req, res, next) => {
-  const codes = { "22P02": { status: 400, msg: "bad request" } };
+  const codes = {
+    "22P02": { status: 400, msg: "Bad Request" },
+    42703: { status: 400, msg: "Bad Request" },
+  };
 
   if (err.code in codes) {
     const { status, msg } = codes[err.code];

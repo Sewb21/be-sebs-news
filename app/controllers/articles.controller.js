@@ -9,7 +9,8 @@ exports.getArticleByID = (req, res, next) => {
 
   selectArticleByID(article_id)
     .then((article) => {
-      res.status(200).send({ article });
+      const newArticle = { article: article[0] };
+      res.status(200).send(newArticle);
     })
     .catch(next);
 };

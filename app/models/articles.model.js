@@ -5,8 +5,8 @@ exports.selectArticleByID = (article_id) => {
     .select("articles.*")
     .from("articles")
     .where({ "articles.article_id": article_id })
+    .leftJoin("comments", "comments.article_id", "articles.article_id")
     .count("comments.comment_id as comment_count")
-    .leftJoin("comments", "comments.article_id", "=", "articles.article_id")
     .groupBy("articles.article_id")
     .then((articles) => {
       if (articles.length === 0) {
@@ -35,5 +35,12 @@ exports.selectAllArticles = ({ sort_by, order, author, topic }) => {
     .modify((query) => {
       if (author) query.where({ "articles.author": author });
       if (topic) query.where({ "articles.topic": topic });
+    })
+    .then((query) => {
+      if (query.length === 0) {
+        return Promise.reject({ status: 404, msg: "Query not found" });
+      } else {
+        return query;
+      }
     });
 };

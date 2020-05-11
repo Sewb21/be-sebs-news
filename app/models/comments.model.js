@@ -3,7 +3,14 @@ const knex = require("../../db/connection");
 exports.addCommentsByArticleID = (article_id, username, body) => {
   return knex("comments")
     .insert({ author: username, article_id: article_id, body: body })
-    .returning(["article_id", "author", "body", "comment_id", "votes"]);
+    .returning([
+      "article_id",
+      "author",
+      "body",
+      "comment_id",
+      "votes",
+      "created_at",
+    ]);
 };
 
 exports.selectCommentsByArticleID = (article_id, sort_by, order) => {
@@ -14,10 +21,10 @@ exports.selectCommentsByArticleID = (article_id, sort_by, order) => {
     .where("article_id", "=", article_id);
 };
 
-exports.updateVotesByCommentID = (comment_id, inc_vote) => {
+exports.updateVotesByCommentID = (comment_id, inc_votes) => {
   return knex("comments")
     .where({ "comments.comment_id": comment_id })
-    .increment("votes", inc_vote || 0)
+    .increment("votes", inc_votes || 0)
     .returning("*")
     .then((comment) => {
       if (comment.length === 0) {

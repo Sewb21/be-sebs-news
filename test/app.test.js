@@ -248,13 +248,13 @@ describe("/articles/:article_id/comments", () => {
         .send({ username: "butter_bridge", body: "What a great article" })
         .expect(201)
         .then(({ body }) => {
-          expect(body.comment).toEqual({
-            article_id: "1",
-            author: "butter_bridge",
-            body: "What a great article",
-            comment_id: 19,
-            votes: 0,
-          });
+          expect(body.comment).toHaveProperty("comment_id");
+          expect(body.comment).toHaveProperty("author");
+          expect(body.comment).toHaveProperty("body");
+          expect(body.comment).toHaveProperty("votes");
+          expect(body.comment).toHaveProperty("created_at");
+          expect(body.comment.votes).toBe(0);
+          expect(typeof body.comment.created_at).toEqual("string");
         });
     });
     test("returns a status: 400 for a bad request", () => {
@@ -546,7 +546,7 @@ describe("/comments/:comment_id", () => {
     test("returns a status: 200 and a sucessfully patched updated comment", () => {
       return request(app)
         .patch("/api/comments/1")
-        .send({ inc_vote: 1 })
+        .send({ inc_votes: 1 })
         .expect(200)
         .then(({ body }) => {
           expect(body.comment.votes).toBe(17);
@@ -556,7 +556,7 @@ describe("/comments/:comment_id", () => {
     test("returns a status: 200 and a successfully patched comment when passed a negative number", () => {
       return request(app)
         .patch("/api/comments/1")
-        .send({ inc_vote: -1 })
+        .send({ inc_votes: -1 })
         .expect(200)
         .then(({ body }) => {
           expect(body.comment.votes).toBe(15);
@@ -586,7 +586,7 @@ describe("/comments/:comment_id", () => {
     test("retuns a status: 404 when passed an inc_votes that is invalid", () => {
       return request(app)
         .patch("/api/comments/1")
-        .send({ inc_vote: "wow" })
+        .send({ inc_votes: "wow" })
         .expect(400)
         .then(({ body }) => {
           expect(body.msg).toBe("Bad Request");

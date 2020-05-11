@@ -61,11 +61,9 @@ describe("/users/:username", () => {
         .get("/api/users/butter_bridge")
         .expect(200)
         .then(({ body }) => {
-          body.user.forEach((user) => {
-            expect(user).toHaveProperty("username");
-            expect(user).toHaveProperty("avatar_url");
-            expect(user).toHaveProperty("name");
-          });
+          expect(body.user).toHaveProperty("username");
+          expect(body.user).toHaveProperty("avatar_url");
+          expect(body.user).toHaveProperty("name");
         });
     });
     test("returns a status: 405 for an invalid method", () => {
@@ -554,6 +552,7 @@ describe("/comments/:comment_id", () => {
           expect(body.comment.votes).toBe(17);
         });
     });
+
     test("returns a status: 200 and a successfully patched comment when passed a negative number", () => {
       return request(app)
         .patch("/api/comments/1")
@@ -563,6 +562,17 @@ describe("/comments/:comment_id", () => {
           expect(body.comment.votes).toBe(15);
         });
     });
+
+    test("returns a status: 200 when passed a body with no inc_votes property", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({})
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comment.votes).toBe(16);
+        });
+    });
+
     test("returns a 404 when passed a invalid comment id", () => {
       return request(app)
         .patch("/api/comments/1000")
@@ -572,10 +582,11 @@ describe("/comments/:comment_id", () => {
           expect(body.msg).toBe("comment not found");
         });
     });
-    test.only("retuns a status: 404 when passed an inc_votes that is invalid", () => {
+
+    test("retuns a status: 404 when passed an inc_votes that is invalid", () => {
       return request(app)
         .patch("/api/comments/1")
-        .send({ inc_votes: "wow" })
+        .send({ inc_vote: "wow" })
         .expect(400)
         .then(({ body }) => {
           expect(body.msg).toBe("Bad Request");

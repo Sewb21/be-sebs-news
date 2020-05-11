@@ -17,7 +17,7 @@ exports.selectCommentsByArticleID = (article_id, sort_by, order) => {
 exports.updateVotesByCommentID = (comment_id, inc_vote) => {
   return knex("comments")
     .where({ "comments.comment_id": comment_id })
-    .increment("votes", inc_vote)
+    .increment("votes", inc_vote || 0)
     .returning("*")
     .then((comment) => {
       if (comment.length === 0) {

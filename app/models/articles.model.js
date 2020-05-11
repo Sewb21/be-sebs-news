@@ -35,12 +35,5 @@ exports.selectAllArticles = ({ sort_by, order, author, topic }) => {
     .modify((query) => {
       if (author) query.where({ "articles.author": author });
       if (topic) query.where({ "articles.topic": topic });
-    })
-    .then((query) => {
-      if (query.length === 0) {
-        return Promise.reject({ status: 404, msg: "Query not found" });
-      } else {
-        return query;
-      }
     });
 };

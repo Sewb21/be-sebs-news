@@ -21,6 +21,7 @@ describe("/api", () => {
       });
   });
 });
+
 describe("/topics", () => {
   describe("GET", () => {
     test("responds with a status: 200 and a topic object of whats been sent", () => {
@@ -52,6 +53,7 @@ describe("/topics", () => {
       });
   });
 });
+
 describe("/users/:username", () => {
   describe("GET", () => {
     test("responds with a status: 200 and a specific user object", () => {
@@ -92,6 +94,7 @@ describe("/users/:username", () => {
     });
   });
 });
+
 describe("/articles/:article_id", () => {
   describe("GET", () => {
     test("returns a status: 200 and body to be an object", () => {
@@ -206,7 +209,7 @@ describe("/articles/:article_id", () => {
             author: "butter_bridge",
             body: "I find this existence challenging",
             created_at: "2018-11-15T12:21:54.171Z",
-            votes: "101",
+            votes: 101,
           });
         });
     });
@@ -216,14 +219,14 @@ describe("/articles/:article_id", () => {
         .send({ inc_votes: 25 })
         .expect(200)
         .then(({ body }) => {
-          expect(body.article[0]).toEqual({
+          expect(body.article).toEqual({
             article_id: 1,
             title: "Living in the shadow of a great man",
             topic: "mitch",
             author: "butter_bridge",
             body: "I find this existence challenging",
             created_at: "2018-11-15T12:21:54.171Z",
-            votes: "125",
+            votes: 125,
           });
         });
     });
@@ -233,11 +236,12 @@ describe("/articles/:article_id", () => {
         .send({})
         .expect(200)
         .then(({ body }) => {
-          expect(body.article.votes).toBe("100");
+          expect(body.article.votes).toBe(100);
         });
     });
   });
 });
+
 describe("/articles/:article_id/comments", () => {
   describe("POST", () => {
     test("Returns a status: 200 and the posted comment", () => {
@@ -251,8 +255,26 @@ describe("/articles/:article_id/comments", () => {
             author: "butter_bridge",
             body: "What a great article",
             comment_id: 19,
-            votes: "0",
+            votes: 0,
           });
+        });
+    });
+    test("returns a status: 400 for a bad request", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .expect(400)
+        .send({})
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad Request");
+        });
+    });
+    test("returns a status: 404 when trying to post a comment to a valid article_id that doesnt exist", () => {
+      return request(app)
+        .post("/api/articles/10000/comments")
+        .send({ username: "butter_bridge", body: "What a great article" })
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad Request");
         });
     });
   });
@@ -271,6 +293,21 @@ describe("/articles/:article_id/comments", () => {
           });
         });
     });
+    test("returns a status: 200 and an array of comments", () => {
+      return request(app)
+        .get("/api/articles/2/comments")
+        .expect(200)
+        .then(({ body }) => {
+          body.comments.forEach((comment) => {
+            expect(comment).toHaveProperty("comment_id");
+            expect(comment).toHaveProperty("votes");
+            expect(comment).toHaveProperty("created_at");
+            expect(comment).toHaveProperty("author");
+            expect(comment).toHaveProperty("body");
+          });
+        });
+    });
+
     test("returns a status: 200 and a sorted comments array defaulted to created_at", () => {
       return request(app)
         .get("/api/articles/1/comments")
@@ -286,7 +323,7 @@ describe("/articles/:article_id/comments", () => {
         .get("/api/articles/1000/comments")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).toBe("comments not found");
+          expect(body.msg).toBe("article not found");
         });
     });
     test("returns a status: 200 and a sucessfull sort by query by votes", () => {
@@ -362,6 +399,7 @@ describe("/articles/:article_id/comments", () => {
     });
   });
 });
+
 describe("/articles", () => {
   describe("GET", () => {
     test("returns a status: 200 and an array of article objects", () => {
@@ -436,12 +474,20 @@ describe("/articles", () => {
           expect(body.articles.length).toBe(3);
         });
     });
+    test("returns a status: 200 and returns an empty article for a topic that does exist but has no articles is requested", () => {
+      return request(app)
+        .get("/api/articles?topic=paper")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles).toEqual([]);
+        });
+    });
     test("returns a status: 404 and a msg: topic not found", () => {
       return request(app)
-        .get("/api/articles?topic=not-a-topic")
+        .get("/api/articles?topic=topic-doesnt-exist")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).toBe("Query not found");
+          expect(body.msg).toBe("topic not found");
         });
     });
     test("returns a status: 200 for a valid author with no articles and just an empty array", () => {
@@ -449,7 +495,7 @@ describe("/articles", () => {
         .get("/api/articles?author=lurker")
         .expect(200)
         .then(({ body }) => {
-          expect(body.msg).toEqual([]);
+          expect(body.articles).toEqual([]);
         });
     });
     test("returns a status: 404 and a msg: topic not found", () => {
@@ -457,7 +503,7 @@ describe("/articles", () => {
         .get("/api/articles?author=not-an-author")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).toBe("Query not found");
+          expect(body.msg).toBe("user not found");
         });
     });
     test("returns a status: 404 and a msg: topic not found", () => {
@@ -465,7 +511,7 @@ describe("/articles", () => {
         .get("/api/articles?author=not-an-author?topic=not-a-topic")
         .expect(404)
         .then(({ body }) => {
-          expect(body.msg).toBe("Query not found");
+          expect(body.msg).toBe("user not found");
         });
     });
     test("returns a status: 400 for a bad request when trying to sort by an non existent column", () => {
@@ -476,16 +522,27 @@ describe("/articles", () => {
           expect(body.msg).toBe("Bad Request");
         });
     });
+    test("returns status: 200 and returns only the topic passed in as a query", () => {
+      return request(app)
+        .get("/api/articles?topic=mitch")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.articles.length).toBe(11);
+        });
+    });
   });
-  test("returns status: 200 and returns only the topic passed in as a query", () => {
-    return request(app)
-      .get("/api/articles?topic=mitch")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.articles.length).toBe(11);
-      });
+  describe("PATCH", () => {
+    test("returns a status: 405 and a error message when using an invalid method", () => {
+      return request(app)
+        .patch("/api/articles")
+        .expect(405)
+        .then(({ body }) => {
+          expect(body.msg).toBe("method not allowed");
+        });
+    });
   });
 });
+
 describe("/comments/:comment_id", () => {
   describe("PATCH", () => {
     test("returns a status: 200 and a sucessfully patched updated comment", () => {
@@ -494,7 +551,7 @@ describe("/comments/:comment_id", () => {
         .send({ inc_vote: 1 })
         .expect(200)
         .then(({ body }) => {
-          expect(body.comment[0].votes).toBe("17");
+          expect(body.comment.votes).toBe(17);
         });
     });
     test("returns a status: 200 and a successfully patched comment when passed a negative number", () => {
@@ -503,7 +560,7 @@ describe("/comments/:comment_id", () => {
         .send({ inc_vote: -1 })
         .expect(200)
         .then(({ body }) => {
-          expect(body.comment[0].votes).toBe("15");
+          expect(body.comment.votes).toBe(15);
         });
     });
     test("returns a 404 when passed a invalid comment id", () => {
@@ -513,6 +570,15 @@ describe("/comments/:comment_id", () => {
         .expect(404)
         .then(({ body }) => {
           expect(body.msg).toBe("comment not found");
+        });
+    });
+    test.only("retuns a status: 404 when passed an inc_votes that is invalid", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: "wow" })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad Request");
         });
     });
   });

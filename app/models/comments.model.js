@@ -11,14 +11,7 @@ exports.selectCommentsByArticleID = (article_id, sort_by, order) => {
     .select("comments.*")
     .from("comments")
     .orderBy(sort_by || "created_at", order || "desc")
-    .where("article_id", "=", article_id)
-    .then((comments) => {
-      if (comments.length === 0) {
-        return Promise.reject({ status: 404, msg: "comments not found" });
-      } else {
-        return comments;
-      }
-    });
+    .where("article_id", "=", article_id);
 };
 
 exports.updateVotesByCommentID = (comment_id, inc_vote) => {

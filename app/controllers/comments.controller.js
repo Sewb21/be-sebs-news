@@ -4,6 +4,7 @@ const {
   addCommentsByArticleID,
   selectCommentsByArticleID,
 } = require("../models/comments.model");
+const { selectArticleByID } = require("../models/articles.model");
 
 exports.postCommentsByArticleID = (req, res, next) => {
   const { article_id } = req.params;
@@ -21,9 +22,13 @@ exports.postCommentsByArticleID = (req, res, next) => {
 exports.getCommentsByArticleID = (req, res, next) => {
   const { article_id } = req.params;
   const { sort_by, order } = req.query;
+  const queries = [selectCommentsByArticleID(article_id, sort_by, order)];
 
-  selectCommentsByArticleID(article_id, sort_by, order)
-    .then((comments) => {
+  if (article_id) queries.push(selectArticleByID(article_id));
+
+  Promise.all(queries)
+    .then((results) => {
+      const comments = results[0];
       res.status(200).send({ comments });
     })
     .catch(next);
@@ -35,7 +40,8 @@ exports.patchCommentByID = (req, res, next) => {
 
   updateVotesByCommentID(comment_id, inc_vote)
     .then((comment) => {
-      res.status(200).send({ comment });
+      const newComment = { comment: comment[0] };
+      res.status(200).send(newComment);
     })
     .catch(next);
 };

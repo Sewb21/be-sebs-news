@@ -6,7 +6,12 @@ const {
   patchArticleByID,
 } = require("../controllers/articles.controller");
 
-articlesRouter.route("/").get(getAllArticles);
+articlesRouter
+  .route("/")
+  .get(getAllArticles)
+  .all((req, res) => {
+    res.status(405).send({ msg: "method not allowed" });
+  });
 
 articlesRouter
   .route("/:article_id")

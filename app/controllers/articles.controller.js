@@ -3,10 +3,10 @@ const {
   updateArticleByID,
   selectAllArticles,
 } = require("../models/articles.model");
+const { selectUserByUsername } = require("../models/users.models");
 
 exports.getArticleByID = (req, res, next) => {
   const { article_id } = req.params;
-
   selectArticleByID(article_id)
     .then((article) => {
       const newArticle = { article: article[0] };
@@ -21,16 +21,19 @@ exports.patchArticleByID = (req, res, next) => {
 
   updateArticleByID(article_id, inc_votes)
     .then((article) => {
-      res.status(200).send({ article });
+      const newArticle = { article: article[0] };
+      res.status(200).send(newArticle);
     })
     .catch(next);
 };
 
 exports.getAllArticles = (req, res, next) => {
   const { sort_by, order, author, topic } = req.query;
-
-  selectAllArticles({ sort_by, order, author, topic })
-    .then((articles) => {
+  const queries = [selectAllArticles({ sort_by, order, author, topic })];
+  if (author) queries.push(selectUserByUsername);
+  Promise.all(queries)
+    .then((results) => {
+      const articles = results[0];
       res.status(200).send({ articles });
     })
     .catch(next);

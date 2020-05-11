@@ -103,7 +103,7 @@ describe("/articles/:article_id", () => {
           expect(Array.isArray(body)).toBe(false);
         });
     });
-    test.only("responds with a status: 200 and a article object which should have certain properties", () => {
+    test("responds with a status: 200 and a article object which should have certain properties", () => {
       return request(app)
         .get("/api/articles/1")
         .expect(200)
@@ -116,10 +116,10 @@ describe("/articles/:article_id", () => {
           expect(body.article).toHaveProperty("created_at");
           expect(body.article).toHaveProperty("votes");
           expect(body.article).toHaveProperty("comment_count");
-          expect(body.article.count).toBe("13");
+          expect(body.article.comment_count).toBe("13");
         });
     });
-    test.only("responds with a status: 200 and a article object which should have certain properties", () => {
+    test("responds with a status: 200 and a article object which should have certain properties", () => {
       return request(app)
         .get("/api/articles/2")
         .expect(200)
@@ -132,7 +132,7 @@ describe("/articles/:article_id", () => {
           expect(body.article).toHaveProperty("created_at");
           expect(body.article).toHaveProperty("votes");
           expect(body.article).toHaveProperty("comment_count");
-          expect(body.article.count).toBe("0");
+          expect(body.article.comment_count).toBe("0");
         });
     });
     test("returns a status: 404 for an ivalid path", () => {
@@ -145,7 +145,7 @@ describe("/articles/:article_id", () => {
     });
     test("returns a status: 404 for an ivalid path", () => {
       return request(app)
-        .get("/api/articles/1000")
+        .get("/api/articles/22343534")
         .expect(404)
         .then(({ body }) => {
           expect(body.msg).toBe("article not found");
@@ -199,7 +199,7 @@ describe("/articles/:article_id", () => {
         .send({ inc_votes: 1 })
         .expect(200)
         .then(({ body }) => {
-          expect(body.article[0]).toEqual({
+          expect(body.article).toEqual({
             article_id: 1,
             title: "Living in the shadow of a great man",
             topic: "mitch",
@@ -227,6 +227,15 @@ describe("/articles/:article_id", () => {
           });
         });
     });
+    test("returns a status: 200 however when sent no votes it defaults to 0 and sends back the article", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({})
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.article.votes).toBe("100");
+        });
+    });
   });
 });
 describe("/articles/:article_id/comments", () => {
@@ -237,7 +246,7 @@ describe("/articles/:article_id/comments", () => {
         .send({ username: "butter_bridge", body: "What a great article" })
         .expect(201)
         .then(({ body }) => {
-          expect(body.postedComment[0]).toEqual({
+          expect(body.comment).toEqual({
             article_id: "1",
             author: "butter_bridge",
             body: "What a great article",
@@ -247,84 +256,110 @@ describe("/articles/:article_id/comments", () => {
         });
     });
   });
-});
-describe("GET", () => {
-  test("returns a status: 200 and an array of comments", () => {
-    return request(app)
-      .get("/api/articles/1/comments")
-      .expect(200)
-      .then(({ body }) => {
-        body.comments.forEach((comment) => {
-          expect(comment).toHaveProperty("comment_id");
-          expect(comment).toHaveProperty("votes");
-          expect(comment).toHaveProperty("created_at");
-          expect(comment).toHaveProperty("author");
-          expect(comment).toHaveProperty("body");
+  describe("GET", () => {
+    test("returns a status: 200 and an array of comments", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          body.comments.forEach((comment) => {
+            expect(comment).toHaveProperty("comment_id");
+            expect(comment).toHaveProperty("votes");
+            expect(comment).toHaveProperty("created_at");
+            expect(comment).toHaveProperty("author");
+            expect(comment).toHaveProperty("body");
+          });
         });
-      });
+    });
+    test("returns a status: 200 and a sorted comments array defaulted to created_at", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toBeSortedBy("created_at", {
+            descending: true,
+          });
+        });
+    });
+    test("returns a status: 404 when passed an invalid id", () => {
+      return request(app)
+        .get("/api/articles/1000/comments")
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe("comments not found");
+        });
+    });
+    test("returns a status: 200 and a sucessfull sort by query by votes", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=votes")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toBeSortedBy("votes", {
+            descending: true,
+            coerce: true,
+          });
+        });
+    });
+    test("returns a status: 200 and a sucessfull sort by query by author", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=author")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toBeSortedBy("author", {
+            descending: true,
+          });
+        });
+    });
+    test("returns a status: 200 and a sucessfull sort by query by comment_id", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=comment_id")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toBeSortedBy("comment_id", {
+            descending: true,
+            coerce: true,
+          });
+        });
+    });
+    test("returns a status: 200 and the order of the order correctly switched to ascending", () => {
+      return request(app)
+        .get("/api/articles/1/comments?order=asc")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toBeSortedBy("created_at", {
+            ascending: true,
+          });
+        });
+    });
+    test("returns a status: 200 and the order of the votes sorted_by order", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=votes&&order=asc")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.comments).toBeSortedBy("votes", {
+            ascending: true,
+            coerce: true,
+          });
+        });
+    });
+    test("returns a status: 400 when asked to sort by an invalid column", () => {
+      return request(app)
+        .get("/api/articles/1/comments?sort_by=not-a-valid-column")
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Bad Request");
+        });
+    });
   });
-  test("returns a status: 200 and a sorted comments array defaulted to created_at", () => {
-    return request(app)
-      .get("/api/articles/1/comments")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.comments).toBeSortedBy("created_at", {
-          descending: true,
+  describe("ERRORS", () => {
+    test("returns a status: 405 when using an invalid method", () => {
+      return request(app)
+        .put("/api/articles/1/comments")
+        .expect(405)
+        .then(({ body }) => {
+          expect(body.msg).toBe("method not allowed");
         });
-      });
-  });
-  test("returns a status: 200 and a sucessfull sort by query by votes", () => {
-    return request(app)
-      .get("/api/articles/1/comments?sort_by=votes")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.comments).toBeSortedBy("votes", {
-          descending: true,
-          coerce: true,
-        });
-      });
-  });
-  test("returns a status: 200 and a sucessfull sort by query by author", () => {
-    return request(app)
-      .get("/api/articles/1/comments?sort_by=author")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.comments).toBeSortedBy("author", {
-          descending: true,
-        });
-      });
-  });
-  test("returns a status: 200 and a sucessfull sort by query by comment_id", () => {
-    return request(app)
-      .get("/api/articles/1/comments?sort_by=comment_id")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.comments).toBeSortedBy("comment_id", {
-          descending: true,
-          coerce: true,
-        });
-      });
-  });
-  test("returns a status: 200 and the order of the order correctly switched to ascending", () => {
-    return request(app)
-      .get("/api/articles/1/comments?order=asc")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.comments).toBeSortedBy("created_at", {
-          ascending: true,
-        });
-      });
-  });
-  test("returns a status: 200 and the order of the votes sorted_by order", () => {
-    return request(app)
-      .get("/api/articles/1/comments?sort_by=votes&&order=asc")
-      .expect(200)
-      .then(({ body }) => {
-        expect(body.comments).toBeSortedBy("votes", {
-          ascending: true,
-          coerce: true,
-        });
-      });
+    });
   });
 });
 describe("/articles", () => {
@@ -407,6 +442,14 @@ describe("/articles", () => {
         .expect(404)
         .then(({ body }) => {
           expect(body.msg).toBe("Query not found");
+        });
+    });
+    test("returns a status: 200 for a valid author with no articles and just an empty array", () => {
+      return request(app)
+        .get("/api/articles?author=lurker")
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.msg).toEqual([]);
         });
     });
     test("returns a status: 404 and a msg: topic not found", () => {

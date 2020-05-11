@@ -12,7 +12,8 @@ exports.postCommentsByArticleID = (req, res, next) => {
 
   addCommentsByArticleID(article_id, username, body)
     .then((postedComment) => {
-      res.status(201).send({ postedComment });
+      const newPostedComment = { comment: postedComment[0] };
+      res.status(201).send(newPostedComment);
     })
     .catch(next);
 };

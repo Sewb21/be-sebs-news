@@ -10,11 +10,17 @@ const {
 commentsRouter
   .route("/:comment_id")
   .patch(patchCommentByID)
-  .delete(deleteCommentByID);
+  .delete(deleteCommentByID)
+  .all((req, res) => {
+    res.status(405).send({ msg: "method not allowed" });
+  });
 
 getCommentsByArticleIDRouter
   .route("/:article_id/comments")
   .post(postCommentsByArticleID)
-  .get(getCommentsByArticleID);
+  .get(getCommentsByArticleID)
+  .all((req, res) => {
+    res.status(405).send({ msg: "method not allowed" });
+  });
 
 module.exports = { commentsRouter, getCommentsByArticleIDRouter };

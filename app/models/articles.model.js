@@ -5,7 +5,7 @@ exports.selectArticleByID = (article_id) => {
     .select("articles.*")
     .from("articles")
     .where({ "articles.article_id": article_id })
-    .leftJoin("comments", "comments.article_id", "articles.article_id")
+    .leftJoin("comments", "articles.article_id", "=", "comments.article_id")
     .count("comments.comment_id as comment_count")
     .groupBy("articles.article_id")
     .then((articles) => {
@@ -21,7 +21,7 @@ exports.selectArticleByID = (article_id) => {
 exports.updateArticleByID = (article_id, inc_votes) => {
   return knex("articles")
     .where({ "articles.article_id": article_id })
-    .increment("votes", inc_votes)
+    .increment("votes", inc_votes || 0)
     .returning("*");
 };
 

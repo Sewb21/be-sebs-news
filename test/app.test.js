@@ -12,12 +12,29 @@ afterAll(() => {
 });
 
 describe("/api", () => {
-  test("responds with a status: 200 and a msg: Welcome to NC NEWS!", () => {
+  test("Returns a status: 200 and a json of all the available endpoints", () => {
     return request(app)
       .get("/api")
       .expect(200)
       .then(({ body }) => {
-        expect(body.msg).toBe("Welcome to NC NEWS!");
+        expect(body).toHaveProperty("GET /api");
+        expect(body).toHaveProperty("GET /api/topics");
+        expect(body).toHaveProperty("GET /api/users/:username");
+        expect(body).toHaveProperty("GET /api/articles/:article_id");
+        expect(body).toHaveProperty("PATCH /api/articles/:article_id");
+        expect(body).toHaveProperty("POST /api/articles/:article_id/comments");
+        expect(body).toHaveProperty("GET /api/articles/:article_id/comments");
+        expect(body).toHaveProperty("GET /api/articles");
+        expect(body).toHaveProperty("PATCH /api/comments/:comment_id");
+        expect(body).toHaveProperty("DELETE /api/comments/:comment_id");
+      });
+  });
+  test("returns a status: 405 when trying to delete the /api endpoint", () => {
+    return request(app)
+      .del("/api")
+      .expect(405)
+      .then(({ body }) => {
+        expect(body.msg).toBe("method not allowed");
       });
   });
 });

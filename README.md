@@ -14,4 +14,6 @@ Change directory through the terminal into the newly cloned repo.
 
 #### Step 3 - npm i all dependancies
 
+`npm i`
+
 Make sure to npm install all dependancies.

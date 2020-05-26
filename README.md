@@ -1,4 +1,8 @@
-# Sebs-news-api
+# Sebs news api
+
+### Introduction
+
+This is an API for a news website. See below what dependancies you need and also the available endpoints and how to get started.
 
 ### **Getting started - What do you need?**
 
@@ -14,6 +18,8 @@ Change directory through the terminal into the newly cloned repo.
 
 #### Step 3 - npm i all dependancies
 
-`npm i`
+Make sure to npm install all dependancies using the command `npm i`.
 
-Make sure to npm install all dependancies.
+#### Step 4 - Open the hosted link in Google Chrome
+
+Use the link below to access the api. The endpoint https://sebs-news-api.herokuapp.com/api will show all the available endpoints and an example of what you can expect on them.
